@@ -103,3 +103,4 @@ ENV/
 # privacy
 client_secret.json
 keys.py
+watsonbot/
