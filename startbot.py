@@ -201,7 +201,7 @@ def handle_command(command, channel, user):
         elif store_status == -1:
             response = "Le token que vous m'avez donné n'est pas valide."
         elif store_status == 0:
-            response = "Authentification réussie ! J'ai maintenant accès à votre agenda."
+            response = "Authentification réussie ! J'ai maintenant accès à votre agenda Google principal."
     elif get_credentials(user) is None or command.startswith("reauth"):
         response = "Ouvrez cette url dans votre navigateur: " +  get_auth_url(user) \
                    + " \n Puis envoyez-moi le token obtenu en disant @watson token abc123."
