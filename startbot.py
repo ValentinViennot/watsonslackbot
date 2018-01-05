@@ -106,7 +106,7 @@ def set_auth_token(user, token):
         return None
 
 
-def calendarUsage(user, intent):
+def calendarUsage(user, intent, d, t):
     """Shows basic usage of the Google Calendar API.
 
     Creates a Google Calendar API service object and outputs a list of the next
@@ -119,7 +119,7 @@ def calendarUsage(user, intent):
     http = credentials.authorize(httplib2.Http())
     service = discovery.build('calendar', 'v3', http=http, cache_discovery=False)
 
-    now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
+    now = d + 'T' + t + 'Z' # 'Z' indicates UTC time
     print('Getting the 10 upcoming events')
     eventsResult = service.events().list(
         calendarId='primary', timeMin=now, maxResults=10, singleEvents=True,
@@ -234,8 +234,23 @@ def handle_command(command, channel, user):
         #Render response on Bot
         #Format Calendar output on the basis of intent of query
         if intent == "schedule" or intent == "free_time":
-            # TODO get entities
-            calusage = calendarUsage(user, intent)
+            # get entities
+            datetmp = datetime.date.today().isoformat()
+            timetmp = datetime.datetime.utcnow().time().isoformat()
+            try:
+                for i in range(0,3):
+                    try:
+                        if responseFromWatson['entities'][i]['entity'] == "sys-date":
+                            datetmp = responseFromWatson['entities'][i]['value']
+                            pass
+                        elif responseFromWatson['entities'][i]['entity'] == "sys-time":
+                            timetmp = responseFromWatson['entities'][i]['value'] + ".000000"
+                            pass
+                    except KeyError:
+                        pass
+            except IndexError:
+                pass
+            calusage = calendarUsage(user, intent, datetmp, timetmp)
             if intent == "schedule":
                 response = responseFromWatson['output']['text'][0]
                 attachments = calusage
