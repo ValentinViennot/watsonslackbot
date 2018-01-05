@@ -99,3 +99,7 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# privacy
+client_secret.json
+keys.py
