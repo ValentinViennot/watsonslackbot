@@ -31,26 +31,12 @@ except ImportError:
 # starterbot's ID as an environment variable
 #BOT_ID = os.environ.get("BOT_ID")
 
-
-
-# If modifying these scopes, delete your previously saved credentials
-# at ~/.credentials/calendar-python-quickstart.json
-SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
-CLIENT_SECRET_FILE = 'client_secret.json'
-APPLICATION_NAME = 'Google Calendar API Slack'
+import keys
 
 # instantiate Slack & Twilio clients
-slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
-AT_BOT = "U8N4VN18U"
-# export SLACK_BOT_TOKEN='xoxb-294165749300-ynkQc0RL8Uyn7fZHY9x4jgkL'
+slack_client = SlackClient(keys.SLACK_BOT_TOKEN)
 
-#instantiate workspace and context for Conversation service
-WORKSPACE_ID = '4502d58d-bae1-4667-987a-3254fd8f1580'
-USERNAME = 'cd5c2a86-dc73-4655-ae12-2cbba8593b16'
-PASSWORD = '77DLTrNYFmK3'
 context = {}
-
-
 FLOW_MAP = {}
 
 def get_credentials(user):
@@ -84,8 +70,8 @@ def get_auth_url(user):
     existing_flow = FLOW_MAP.get(user)
     if existing_flow is None:
         #urn:ietf:wg:oauth:2.0:oob to not redirect anywhere, but instead show the token on the auth_uri page
-        flow = client.flow_from_clientsecrets(filename = CLIENT_SECRET_FILE, scope = SCOPES, redirect_uri = "urn:ietf:wg:oauth:2.0:oob")
-        flow.user_agent = APPLICATION_NAME
+        flow = client.flow_from_clientsecrets(filename = keys.CLIENT_SECRET_FILE, scope = keys.SCOPES, redirect_uri = "urn:ietf:wg:oauth:2.0:oob")
+        flow.user_agent = keys.APPLICATION_NAME
         auth_url = flow.step1_get_authorize_url()
         print(auth_url)
         FLOW_MAP[user] = flow
@@ -222,14 +208,14 @@ def handle_command(command, channel, user):
     else :
         #Link to Watson Conversation as Auth is completed
         conversation = ConversationV1(
-            username = USERNAME,
-            password = PASSWORD,
+            username = keys.USERNAME,
+            password = keys.PASSWORD,
             version = '2017-04-21', url = 'https://gateway-fra.watsonplatform.net/conversation/api'
         )
 
         #Get response from Watson Conversation
         responseFromWatson = conversation.message(
-            workspace_id=WORKSPACE_ID,
+            workspace_id=keys.WORKSPACE_ID,
             input={'text': command},
             context=context
         )
@@ -272,9 +258,9 @@ def parse_slack_output(slack_rtm_output):
     output_list = slack_rtm_output
     if output_list and len(output_list) > 0:
         for output in output_list:
-            if output and 'text' in output and AT_BOT in output['text']:
+            if output and 'text' in output and keys.AT_BOT in output['text']:
                 # return text after the @ mention, whitespace removed
-                return output['text'].split("<@"+AT_BOT+">")[1].strip(), \
+                return output['text'].split("<@"+keys.AT_BOT+">")[1].strip(), \
                        output['channel'], output['user']
     return None, None, None
 
