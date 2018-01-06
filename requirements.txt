@@ -1,0 +1,3 @@
+watson-developer-cloud
+slackclient
+google-api-python-client

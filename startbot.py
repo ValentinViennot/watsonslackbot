@@ -193,18 +193,21 @@ def handle_command(command, channel, user):
     attachments = ""
     response = "Je ne comprends pas cette demande."
     print("Command : "+command)
-    #Manage authentication process
+
+    # store token command 
     if command.startswith("token"):
         store_status = set_auth_token(user, command[6:].strip())
         if store_status is None:
-            response = "Vous devez d'abord me donner l'autorisation de consulter votre calendrier, dites @watson hello."
+            response = "Vous devez d'abord me donner l'autorisation de consulter votre calendrier, dites '@watson linkcal'"
         elif store_status == -1:
             response = "Le token que vous m'avez donné n'est pas valide."
         elif store_status == 0:
             response = "Authentification réussie ! J'ai maintenant accès à votre agenda Google principal."
-    elif get_credentials(user) is None or command.startswith("reauth"):
-        response = "Ouvrez cette url dans votre navigateur: " +  get_auth_url(user) \
-                   + " \n Puis envoyez-moi le token obtenu en disant @watson token abc123."
+    # login calendar command
+    elif command.startswith("linkcal"):
+        if get_credentials(user) is None:
+            response = "Ouvrez cette url dans votre navigateur: " +  get_auth_url(user) \
+                    + " \n Puis envoyez-moi le token obtenu en disant '@watson token abc123'."
     else :
         #Link to Watson Conversation as Auth is completed
         conversation = ConversationV1(
@@ -232,31 +235,35 @@ def handle_command(command, channel, user):
             pass;
 
         #Render response on Bot
-        #Format Calendar output on the basis of intent of query
+        #Calendar request
         if intent == "schedule" or intent == "free_time":
-            # get entities
-            datetmp = datetime.date.today().isoformat()
-            timetmp = datetime.datetime.utcnow().time().isoformat()
-            try:
-                for i in range(0,3):
-                    try:
-                        if responseFromWatson['entities'][i]['entity'] == "sys-date":
-                            datetmp = responseFromWatson['entities'][i]['value']
-                            pass
-                        elif responseFromWatson['entities'][i]['entity'] == "sys-time":
-                            timetmp = responseFromWatson['entities'][i]['value'] + ".000000"
-                            pass
-                    except KeyError:
-                        pass
-            except IndexError:
-                pass
-            calusage = calendarUsage(user, intent, datetmp, timetmp)
-            if intent == "schedule":
-                response = responseFromWatson['output']['text'][0]
-                attachments = calusage
+            #check if calendar is linked
+            if get_credentials(user) is None:
+                response = "Vous devez d'abord me donner l'autorisation de consulter votre calendrier, dites '@watson linkcal'"
             else:
-                response = calusage
-        #Request not managed by Bot
+                # get entities
+                datetmp = datetime.date.today().isoformat()
+                timetmp = datetime.datetime.utcnow().time().isoformat()
+                try:
+                    for i in range(0,3):
+                        try:
+                            if responseFromWatson['entities'][i]['entity'] == "sys-date":
+                                datetmp = responseFromWatson['entities'][i]['value']
+                                pass
+                            elif responseFromWatson['entities'][i]['entity'] == "sys-time":
+                                timetmp = responseFromWatson['entities'][i]['value'] + ".000000"
+                                pass
+                        except KeyError:
+                            pass
+                except IndexError:
+                    pass
+                calusage = calendarUsage(user, intent, datetmp, timetmp)
+                if intent == "schedule":
+                    response = responseFromWatson['output']['text'][0]
+                    attachments = calusage
+                else:
+                    response = calusage
+        #Other request
         else:
             response = responseFromWatson['output']['text'][0]
         

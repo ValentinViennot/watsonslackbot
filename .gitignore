@@ -104,3 +104,4 @@ ENV/
 client_secret.json
 keys.py
 watsonbot/
+.credentials/
