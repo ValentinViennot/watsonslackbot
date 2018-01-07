@@ -108,3 +108,4 @@ watsonbot/
 
 #Visual Studio
 watsonslackbot.code-workspace
+.vscode/
