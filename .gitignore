@@ -105,3 +105,6 @@ client_secret.json
 keys.py
 watsonbot/
 .credentials/
+
+#Visual Studio
+watsonslackbot.code-workspace
